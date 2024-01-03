@@ -1,0 +1,4 @@
+# Ignore all main.js files
+**/main.js
+# Ignore node_modules directory
+node_modules/
