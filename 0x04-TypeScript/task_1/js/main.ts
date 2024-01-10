@@ -7,12 +7,35 @@ export interface Teacher {
   [porpName: string]: any;
 }
 
-const teacher3: Teacher = {
-  firstName: 'John',
-  fullTimeEmployee: false,
-  lastName: 'Doe',
-  location: 'London',
-  contract: false,
-};
+export interface Directors extends Teacher {
+  numberOfReports: number;
+}
 
-console.log(teacher3);
+export default function printTeacher(firstName: string, lastName: string): string {
+  return `${firstName.charAt(0)}. ${lastName}`;
+}
+
+export interface printTeacherFunction {
+  (firstName: string, lastName: string): string;
+}
+
+interface StudentConstructor {
+  new (firstName: string, lastName: string): Student;
+}
+
+interface Student {
+  workOnHomeWork(): string;
+  displayName(): string;
+}
+
+class StudentClass implements Student {
+  constructor(private firstName: string, private lastName: string) {}
+
+  workOnHomeWork(): string {
+    return 'Currently working';
+  }
+
+  displayName(): string {
+    return this.firstName;
+  }
+}
