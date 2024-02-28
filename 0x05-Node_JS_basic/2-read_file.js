@@ -1,6 +1,13 @@
 const fs = require('fs');
 
 function countStudents(path) {
+  if (!fs.existsSync(path)) {
+    throw new Error('Cannot load the database');
+  }
+  if (!fs.statSync(path).isFile()) {
+    throw new Error('Cannot load the database');
+  }
+
   const students = {};
   const fields = {};
   let count = 0;
