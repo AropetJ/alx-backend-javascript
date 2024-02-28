@@ -18,7 +18,7 @@ function countStudents(fileName) {
         for (let i = 0; i < lines.length; i += 1) {
           if (lines[i]) {
             length += 1;
-            const [name, age, field] = lines[i].split(',');
+            const [name, , field] = lines[i].split(',');
             if (students[field]) {
               students[field].push(name);
             } else {
