@@ -1,64 +1,96 @@
 const express = require('express');
-const { readFile } = require('fs');
+const fs = require('fs');
 
 const app = express();
-const port = 1245;
+const PORT = 1245;
+const DB_FILE = process.argv.length > 2 ? process.argv[2] : '';
 
-function countStudents(fileName) {
-  const students = {};
-  const fields = {};
-  let length = 0;
+/**
+ * Counts the students in a CSV data file.
+ * @param {String} dataPath The path to the CSV data file.
+ * @returns {Promise<String>} A promise that resolves to the report of student counts.
+ */
+const countStudents = (dataPath) => new Promise((resolve, reject) => {
+  if (!dataPath) {
+    reject(new Error('Cannot load the database'));
+  }
 
-  return new Promise((resolve, reject) => {
-    readFile(fileName, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        const lines = data.toString().split('\n');
-        for (let i = 0; i < lines.length; i += 1) {
-          if (lines[i]) {
-            length += 1;
-            const [name, , field] = lines[i].split(',');
-            if (students[field]) {
-              students[field].push(name);
-            } else {
-              students[field] = [name];
-            }
-            fields[field] = (fields[field] || 0) + 1;
-          }
-        }
-        const studentCount = length - 1;
-        let output = `Number of students: ${studentCount}\n`;
-        for (const [key, value] of Object.entries(fields)) {
-          if (key !== 'field') {
-            output += `Number of students in ${key}: ${value}. `;
-            output += `List: ${students[key].join(', ')}\n`;
-          }
-        }
-        resolve(output);
+  fs.readFile(dataPath, 'utf-8', (err, data) => {
+    if (err) {
+      reject(new Error('Cannot load the database'));
+    }
+
+    const fileLines = data.trim().split('\n');
+    const studentGroups = {};
+    const dbFieldNames = fileLines[0].split(',');
+    const studentPropNames = dbFieldNames.slice(0, -1);
+
+    for (const line of fileLines.slice(1)) {
+      const studentRecord = line.split(',');
+      const studentPropValues = studentRecord.slice(0, -1);
+      const field = studentRecord[studentRecord.length - 1];
+
+      if (!studentGroups[field]) {
+        studentGroups[field] = [];
       }
-    });
+
+      const studentEntries = studentPropNames.map((propName, idx) => ({
+        [propName]: studentPropValues[idx],
+      }));
+
+      studentGroups[field].push(Object.assign({}, ...studentEntries));
+    }
+
+    const totalStudents = Object.values(studentGroups).reduce(
+      (pre, cur) => pre.length + cur.length,
+      0,
+    );
+
+    const reportParts = [];
+    reportParts.push(`Number of students: ${totalStudents}`);
+
+    for (const [field, group] of Object.entries(studentGroups)) {
+      reportParts.push(
+        `Number of students in ${field}: ${group.length}.`,
+        'List:',
+        group.map((student) => student.firstname).join(', '),
+      );
+    }
+
+    resolve(reportParts.join('\n'));
   });
-}
-
-app.get('/', (request, response) => {
-  response.send('Hello Holberton School!');
 });
 
-app.get('/students', (request, response) => {
-  const fileName = process.argv[2].toString();
-  countStudents(fileName)
-    .then((output) => {
-      response.send(`This is the list of our students\n${output}`);
+app.get('/', (_, res) => {
+  res.send('Hello Holberton School!');
+});
+
+app.get('/students', (_, res) => {
+  const responseParts = ['This is the list of our students'];
+
+  countStudents(DB_FILE)
+    .then((report) => {
+      responseParts.push(report);
+      const responseText = responseParts.join('\n');
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Length', responseText.length);
+      res.statusCode = 200;
+      res.write(Buffer.from(responseText));
+      res.end();
     })
-    .catch((error) => {
-      console.error(error);
-      response.status(500).send('Internal Server Error');
+    .catch((err) => {
+      responseParts.push(err instanceof Error ? err.message : err.toString());
+      const responseText = responseParts.join('\n');
+      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader('Content-Length', responseText.length);
+      res.statusCode = 200;
+      res.write(Buffer.from(responseText));
+      res.end();
     });
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server listening on PORT ${PORT}`);
 });
 
 module.exports = app;
