@@ -13,9 +13,9 @@
     "license": "ISC",
     "dependencies": {
         "chai-http": "^4.3.0",
+        "check-lint": "^0.1.7",
         "express": "^4.17.1",
-        "fs": "^0.0.1-security",
-        "jest": "^29.7.0",
+        "lint": "^0.8.19",
         "test": "^3.3.0"
     },
     "devDependencies": {
