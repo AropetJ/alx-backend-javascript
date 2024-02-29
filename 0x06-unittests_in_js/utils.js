@@ -1,20 +1,16 @@
-class Utils {
-  static getClassNumber(type, a, b) {
-    const an = Math.round(a);
-    const bn = Math.round(b);
-    let result = 0;
+const Utils = {
+  calculateNumber(type, a, b) {
     if (type === 'SUM') {
-      result = an + bn;
-    } else if (type === 'SUBTRACT') {
-      result = an - bn;
-    } else if (type === 'DIVIDE') {
-      if (bn === 0) {
-        return 'Error';
-      }
-      result = an / bn;
+      return Math.round(a) + Math.round(b);
     }
-    return result;
-  }
-}
+    if (type === 'SUBTRACT') {
+      return Math.round(a) - Math.round(b);
+    }
+    if (type === 'DIVIDE') {
+      return Math.round(b) === 0 ? 'Error' : Math.round(a) / Math.round(b);
+    }
+    return 0;
+  },
+};
 
 module.exports = Utils;
