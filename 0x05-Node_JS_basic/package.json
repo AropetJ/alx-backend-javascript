@@ -16,6 +16,7 @@
         "check-lint": "^0.1.7",
         "express": "^4.17.1",
         "lint": "^0.8.19",
+        "routes": "^2.1.0",
         "test": "^3.3.0"
     },
     "devDependencies": {
