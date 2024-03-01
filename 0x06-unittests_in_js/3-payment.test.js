@@ -1,12 +1,12 @@
-const { describe, it } = require('mocha');
 const sinon = require('sinon');
-const sendPaymentRequestToApi = require('./3-payment');
+const { expect } = require('chai');
 const Utils = require('./utils');
+const sendPaymentRequestToApi = require('./3-payment');
 
 describe('sendPaymentRequestToApi', () => {
   it('sendPaymentRequestToApi uses the calculateNumber method of Utils', () => {
     const payMe = sinon.spy(Utils);
-  
+
     sendPaymentRequestToApi(100, 20);
     expect(payMe.calculateNumber.calledWith('SUM', 100, 20)).to.be.true;
     expect(payMe.calculateNumber.callCount).to.be.equal(1);
